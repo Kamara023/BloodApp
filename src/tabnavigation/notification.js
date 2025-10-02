@@ -1,155 +1,187 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, FlatList } from 'react-native';
 import { Ionicons, AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const notifications = [
   {
-    id: 1,
+    id: '1',
     date: "Aujourd'hui",
     title: "Merci pour votre aide !",
-    description: "Merci pour votre aide ! Merci pour votre aide !  Merci pour votre aide !  Merci pour votre aide !",
-    icon: <AntDesign name="like1" size={28} color="#FFFFFF" />,
+    description: "Merci pour votre aide ! Merci pour votre aide ! Merci pour votre aide ! Merci pour votre aide !",
+    icon: <AntDesign name="like1" size={wp(7)} color="#FFFFFF" />,
   },
   {
-    id: 2,
+    id: '2',
     date: "Aujourd'hui",
     title: "Se sentir mieux dans sa peau",
     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit,",
-    icon: <Ionicons name="happy" size={28} color="#FFFFFF" />,
+    icon: <Ionicons name="happy" size={wp(7)} color="#FFFFFF" />,
   },
   {
-    id: 3,
+    id: '3',
     date: "Hier",
     title: "Besoin de sang B+ dans la région",
     description: "B+ dans la région Merci pour votre aide !",
-    icon: <Ionicons name="pulse-outline" size={28} color="#FFFFFF" />,
+    icon: <Ionicons name="pulse-outline" size={wp(7)} color="#FFFFFF" />,
   },
   {
-    id: 4,
+    id: '4',
     date: "Hier",
     title: "Se sentir mieux dans sa peau",
     description: "mieux dolormieux dans sa peau elit,",
-    icon: <Ionicons name="rocket-sharp" size={28} color="#FFFFFF" />,
+    icon: <Ionicons name="rocket-sharp" size={wp(7)} color="#FFFFFF" />,
   },
   {
-    id: 5,
+    id: '5',
     date: "Aujourd'hui",
     title: "Se sentir mieux dans sa peau",
     description: "mieux dolormieux dans sa peau elit,",
-    icon: <Ionicons name="rocket-sharp" size={28} color="#FFFFFF" />,
+    icon: <Ionicons name="rocket-sharp" size={wp(7)} color="#FFFFFF" />,
   },
 ];
 
 const NotificationCard = ({ icon, title, description }) => (
-  <View style={styles.notificationCard}>
+  <Animated.View entering={FadeInDown.delay(200)} style={styles.notificationCard}>
     <View style={styles.iconContainer}>{icon}</View>
     <View style={styles.textContainer}>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.description}>{description}</Text>
     </View>
-  </View>
+  </Animated.View>
 );
 
 export default function Notification() {
-  const navigation = useNavigation(); // Navigation pour revenir à la page précédente
+  const navigation = useNavigation();
+
+  // Grouper les notifications par date pour FlatList
+  const groupedNotifications = [
+    {
+      title: "Aujourd'hui",
+      data: notifications.filter((notification) => notification.date === "Aujourd'hui"),
+    },
+    {
+      title: "Hier",
+      data: notifications.filter((notification) => notification.date === "Hier"),
+    },
+  ];
+
+  const renderNotification = ({ item }) => (
+    <NotificationCard
+      icon={item.icon}
+      title={item.title}
+      description={item.description}
+    />
+  );
+
+  const renderSectionHeader = ({ section: { title } }) => (
+    <Animated.View entering={FadeInDown} style={styles.dateContainer}>
+      <Text style={styles.dateText}>{title}</Text>
+    </Animated.View>
+  );
 
   return (
-    <View style={styles.container}>
-      {/* En-tête avec le bouton de retour et le titre */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate('Home')}>
-          <Ionicons name="arrow-back-outline" size={40} color="#000000" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Notification</Text>
-      </View>
+    <SafeAreaView style={styles.safeArea} edges={['bottom', 'left', 'right']}>
+      <View style={styles.container}>
+        {/* En-tête */}
+        <Animated.View entering={FadeInDown} style={styles.header}>
+          {/* <TouchableOpacity onPress={() => navigation.navigate('Tabs')}>
+            <Ionicons name="arrow-back-outline" size={wp(8)} color="#000000" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Notifications</Text> */}
+        </Animated.View>
 
-      <ScrollView>
-        {["Aujourd'hui", "Hier"].map((date) => (
-          <View key={date} style={styles.section}>
-            <View style={styles.dateContainer}>
-              <Text style={styles.dateText}>{date}</Text>
-            </View>
-            {notifications
-              .filter((notification) => notification.date === date)
-              .map((notification) => (
-                <NotificationCard
-                  key={notification.id}
-                  icon={notification.icon}
-                  title={notification.title}
-                  description={notification.description}
-                />
-              ))}
-          </View>
-        ))}
-      </ScrollView>
-    </View>
+        {/* Liste des notifications */}
+        <FlatList
+          data={groupedNotifications}
+          renderItem={({ item }) => (
+            <FlatList
+              data={item.data}
+              renderItem={renderNotification}
+              keyExtractor={(notification) => notification.id}
+              showsVerticalScrollIndicator={false}
+            />
+          )}
+          keyExtractor={(section) => section.title}
+          renderSectionHeader={renderSectionHeader}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F8F8F8', // Aligné avec Home, Donateur, Trouverdonateur, BankSang, LocalisationBank
+  },
   container: {
     flex: 1,
-    paddingHorizontal: 15,
-    backgroundColor: "#FFFFFF"
+    paddingHorizontal: wp(4),
   },
   header: {
-    marginTop: '20%',
-    paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 15,
+    gap: wp(3),
+    marginBottom: hp(0.5),
   },
   headerTitle: {
-    fontSize: 30,
-    fontWeight: 'bold',
+    fontSize: wp(6),
+    fontWeight: '700',
+    color: '#000000',
     marginLeft: 'auto',
-    marginRight: 'auto'
+    marginRight: 'auto',
   },
-  section: {
-    paddingHorizontal: 10,
-    marginBottom: 20,
+  listContainer: {
+    paddingBottom: hp(2),
   },
   dateContainer: {
-    marginBottom: 20,
+    marginBottom: hp(2),
   },
   dateText: {
-    color: "#000000",
-    fontSize: 20,
-    fontWeight: "bold",
+    color: '#000000',
+    fontSize: wp(5),
+    fontWeight: '700',
   },
   notificationCard: {
-    flexDirection: "row",
-    gap: 20,
-    alignItems: "center",
-    backgroundColor: "rgba(169,169,169,0.1)",
-    paddingHorizontal: 10,
-    padding: 5,
-    borderRadius: 10,
-    marginBottom: 20,
+    flexDirection: 'row',
+    gap: wp(4),
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF', // Changé de rgba(169,169,169,0.1)
+    padding: wp(3),
+    borderRadius: 15,
+    marginBottom: hp(2),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   iconContainer: {
-    backgroundColor: "#E60449",
-    width: 50,
-    height: 50,
+    backgroundColor: '#E60449',
+    width: wp(12),
+    height: wp(12),
     justifyContent: 'center',
-    alignItems: "center",
-    borderRadius: 99,
+    alignItems: 'center',
+    borderRadius: wp(6),
   },
   textContainer: {
-    gap: 5,
-    width: 270,
-    height: 100,
-    justifyContent: 'center',
+    flex: 1,
+    gap: hp(0.5),
   },
   title: {
-    color: "#000000",
-    fontSize: 18,
-    fontWeight: "bold",
+    color: '#000000',
+    fontSize: wp(4.5),
+    fontWeight: '700',
   },
   description: {
-    color: "rgba(169,169,169,0.9)",
-    fontSize: 17,
-    fontWeight: "normal",
+    color: 'rgba(169,169,169,0.9)',
+    fontSize: wp(4),
+    fontWeight: 'normal',
   },
 });

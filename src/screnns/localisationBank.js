@@ -2,140 +2,320 @@ import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import { Ionicons, AntDesign } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function LocalisationBank() {
-    const navigation = useNavigation();
-    const route = useRoute();
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { imageSource1, imageSource2, name, location, rating, description, avis, nonbreAvis, critique, tempconnection, nom, critiquerediger, note } = route.params;
+  const [selectedButton, setSelectedButton] = useState(null);
 
-    const { imageSource1, imageSource2, name, location, rating, description, avis, nonbreAvis, critique, tempconnection, nom, critiquerediger, note, } = route.params;
-    const [selectedButton, setSelectedButton] = useState(null); // State pour suivre le bouton sélectionné
+  const handleButtonPress = (buttonName) => {
+    setSelectedButton(buttonName === selectedButton ? null : buttonName);
+  };
 
-    // Fonction pour gérer le clic sur les boutons "like" et "dislike"
-    const handleButtonPress = (buttonName) => {
-        setSelectedButton(buttonName === selectedButton ? null : buttonName);
-    };
+  return (
+    <SafeAreaView style={styles.safeArea} edges={['bottom', 'left', 'right']}>
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        {/* Image principale et en-tête */}
+        <Animated.View entering={FadeInDown}>
+          <View style={styles.imageContainer}>
+            <Image source={imageSource1} style={styles.mainImage} />
+            <View style={styles.header}>
+              <TouchableOpacity onPress={() => navigation.navigate('BankSang')}>
+                <Ionicons name="arrow-back-outline" size={wp(8)} color="#000000" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Animated.View>
 
-    return (
-        <View style={styles.container}>
-            {/* Image de fond */}
+        {/* Contenu principal */}
+        <Animated.View entering={FadeInDown.delay(100)} style={styles.contentContainer}>
+          {/* Titre et emplacement */}
+          <View style={styles.titleContainer}>
             <View>
-                <View style={{ justifyContent: 'center', alignItems: "center" }}>
-                    <Image source={imageSource1} style={{ height: 420, width: 420, borderRadius: 25 }} />
-                </View>
+              <Text style={styles.title}>{name}</Text>
+              <View style={styles.locationContainer}>
+                <Ionicons name="location-outline" size={wp(6)} color="#E60449" />
+                <Text style={styles.locationText}>{location}</Text>
+              </View>
             </View>
-
-            {/* Bouton de retour */}
-            <View style={{ paddingHorizontal: 20, bottom: '42%' }}>
-                <TouchableOpacity onPress={() => navigation.navigate('BankSang')}>
-                    <Ionicons name="arrow-back-outline" size={40} color="#000000" />
-                </TouchableOpacity>
+            <View style={styles.ratingContainer}>
+              <Ionicons name="star" size={wp(5)} color="rgba(255, 215, 0, 0.9)" />
+              <Text style={styles.ratingText}>{rating}</Text>
             </View>
+          </View>
 
-            {/* Contenu principal dans un ScrollView */}
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={{ paddingHorizontal: 10 }}>
-                    {/* Titre et emplacement */}
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                        <View>
-                            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#000000' }}>{name}</Text>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 5 }}>
-                                <Ionicons name="location-outline" size={25} color='#E60449' />
-                                <Text style={{ fontSize: 20, fontWeight: 'normal', color: 'rgba(169,169,169,0.9)' }}>{location}</Text>
-                            </View>
-                        </View>
-                        {/* Évaluation */}
-                        <View style={{ marginTop: 8, backgroundColor: 'rgba(169,169,169,0.2)', flexDirection: 'row', alignItems: "center", padding: 2, gap: 8, width: 80, justifyContent: 'center', borderRadius: 10 }}>
-                            <Ionicons name="star" size={25} color='rgba(255, 215, 0, 0.9)' />
-                            <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#000000' }}>{rating}</Text>
-                        </View>
-                    </View>
+          {/* Description */}
+          <Animated.View entering={FadeInDown.delay(200)}>
+            <Text style={styles.description}>{description}</Text>
+          </Animated.View>
 
-                    {/* Description */}
-                    <View>
-                        <Text style={{ fontSize: 16, color: 'rgba(169,169,169,0.9)', fontWeight: '700' }}>
-                            {description}
-                        </Text>
-                    </View>
+          {/* Avis */}
+          <Animated.View entering={FadeInDown.delay(300)} style={styles.avisContainer}>
+            <Text style={styles.avisTitle}>{avis}</Text>
+            <Text style={styles.avisCount}>{nonbreAvis}</Text>
+          </Animated.View>
 
-                    {/* Avis */}
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15, marginTop: 13, marginBottom: 10 }}>
-                        <Text style={{ fontSize: 23, fontWeight: 'bold', color: '#000000' }}>{avis}</Text>
-                        <Text style={{ fontSize: 23, fontWeight: 'bold', color: '#000000' }}>{nonbreAvis}</Text>
-                    </View>
+          {/* Bouton pour rédiger une critique */}
+          <Animated.View entering={FadeInDown.delay(400)}>
+            <TouchableOpacity>
+              <View style={styles.critiqueButton}>
+                <Text style={styles.critiqueButtonText}>{critique}</Text>
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
 
-                    {/* Bouton pour rédiger une critique */}
-                    <TouchableOpacity>
-                        <View style={{ backgroundColor: 'rgba(169,169,169,0.2)', padding: 11, borderRadius: 15 }}>
-                            <Text style={{ color: "#000000", fontSize: 20, paddingLeft: 15 }}>{critique} </Text>
-                        </View>
-                    </TouchableOpacity>
-
-                    {/* Avis utilisateur */}
-                    <View style={{ marginTop: 15, backgroundColor: 'rgba(169,169,169,0.2)', padding: 11, borderRadius: 15, paddingHorizontal: 10 }}>
-                        <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center', marginBottom: 12 }}>
-                            <View>
-                                <Image source={imageSource2} style={{ height: 90, width: 90, borderRadius: 999 }} />
-                            </View>
-                            <View>
-                                <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#000000' }}>{nom}</Text>
-                                <Text style={{ fontSize: 15, fontWeight: 'bold', color: 'rgba(169,169,169,0.9)' }}>{tempconnection} </Text>
-                            </View>
-                            <View style={{ marginTop: 8, backgroundColor: 'rgba(169,169,169,0.2)', flexDirection: 'row', alignItems: "center", padding: 2, gap: 8, width: 80, justifyContent: 'center', borderRadius: 10, marginLeft: 15 }}>
-                                <Ionicons name="star" size={25} color='rgba(255, 215, 0, 0.9)' />
-                                <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#000000' }}>{note}</Text>
-                            </View>
-                        </View>
-                        <View style={{ marginBottom: 4, padding: 10 }}>
-                            <Text style={{ fontSize: 15, color: "#000000", fontWeight: 'normal' }}>{critiquerediger}</Text>
-                        </View>
-                        {/* Boutons "like" et "dislike" */}
-                        <View style={{ marginBottom: 5, flexDirection: 'row', gap: 30, alignItems: 'center' }}>
-                            <TouchableOpacity onPress={() => handleButtonPress('like')}>
-                                <AntDesign
-                                    name="like1"
-                                    size={30}
-                                    color={selectedButton === 'like' ? 'red' : 'rgba(169,169,169,0.9)'}
-                                />
-                            </TouchableOpacity>
-
-                            <TouchableOpacity onPress={() => handleButtonPress('dislike')}>
-                                <AntDesign
-                                    name="dislike1"
-                                    size={30}
-                                    color={selectedButton === 'dislike' ? 'blue' : 'rgba(169,169,169,0.9)'}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-            </ScrollView>
-
-            {/* Boutons d'action */}
-            <View style={{ flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: 40, marginBottom: 40, marginTop: 10 }}>
-                <View>
-                    <TouchableOpacity>
-                        <View style={{ backgroundColor: '#E60449', borderRadius: 20, alignItems: 'center', justifyContent: 'center', padding: 15, width: 160 }}>
-                            <Text style={{ color: '#FFFFFF', fontSize: 20, fontWeight: 'bold' }}>Appeler</Text>
-                        </View>
-                    </TouchableOpacity>
-                </View>
-
-                <View>
-                    <TouchableOpacity>
-                        <View style={{ backgroundColor: '#FFFFFF', borderRadius: 20, alignItems: 'center', justifyContent: 'center', padding: 15, width: 160, borderWidth: 1, borderColor: '#E60449' }}>
-                            <Text style={{ color: '#E60449', fontSize: 20, fontWeight: 'bold' }}>Demander</Text>
-                        </View>
-                    </TouchableOpacity>
-                </View>
+          {/* Avis utilisateur */}
+          <Animated.View entering={FadeInDown.delay(500)} style={styles.reviewCard}>
+            <View style={styles.reviewHeader}>
+              <Image source={imageSource2} style={styles.reviewImage} />
+              <View>
+                <Text style={styles.reviewName}>{nom}</Text>
+                <Text style={styles.reviewTime}>{tempconnection}</Text>
+              </View>
+              <View style={styles.reviewRating}>
+                <Ionicons name="star" size={wp(5)} color="rgba(255, 215, 0, 0.9)" />
+                <Text style={styles.reviewRatingText}>{note}</Text>
+              </View>
             </View>
-        </View>
-    );
+            <Text style={styles.reviewText}>{critiquerediger}</Text>
+            <View style={styles.reviewActions}>
+              <TouchableOpacity onPress={() => handleButtonPress('like')}>
+                <AntDesign
+                  name="like1"
+                  size={wp(7)}
+                  color={selectedButton === 'like' ? 'red' : 'rgba(169,169,169,0.9)'}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleButtonPress('dislike')}>
+                <AntDesign
+                  name="dislike1"
+                  size={wp(7)}
+                  color={selectedButton === 'dislike' ? 'blue' : 'rgba(169,169,169,0.9)'}
+                />
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+
+          {/* Boutons d'action */}
+          <Animated.View entering={FadeInDown.delay(600)} style={styles.actionButtons}>
+            <TouchableOpacity>
+              <View style={styles.callButton}>
+                <Text style={styles.callButtonText}>Appeler</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity>
+              <View style={styles.requestButton}>
+                <Text style={styles.requestButtonText}>Demander</Text>
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
+        </Animated.View>
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingHorizontal: 15,
-        backgroundColor: '#FFFFFF'
-    },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F8F8F8', // Aligné avec Home, Donateur, Trouverdonateur, BankSang
+  },
+  scrollContainer: {
+    paddingBottom: hp(2),
+  },
+  imageContainer: {
+    position: 'relative',
+  },
+  mainImage: {
+    width: wp(100),
+    height: hp(50), // Responsive height
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+  },
+  header: {
+    position: 'absolute',
+    top: hp(2),
+    left: wp(4),
+  },
+  contentContainer: {
+    paddingHorizontal: wp(4),
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: hp(1),
+  },
+  title: {
+    fontSize: wp(5.5),
+    fontWeight: '700',
+    color: '#000000',
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(2),
+    marginTop: hp(0.5),
+  },
+  locationText: {
+    fontSize: wp(4),
+    color: 'rgba(169,169,169,0.9)',
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(169,169,169,0.2)',
+    borderRadius: 10,
+    padding: wp(1.5),
+    gap: wp(2),
+    width: wp(20),
+  },
+  ratingText: {
+    fontSize: wp(4.5),
+    fontWeight: '700',
+    color: '#000000',
+  },
+  description: {
+    fontSize: wp(4),
+    color: 'rgba(169,169,169,0.9)',
+    fontWeight: '700',
+    marginVertical: hp(1),
+  },
+  avisContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(4),
+    marginVertical: hp(1),
+  },
+  avisTitle: {
+    fontSize: wp(5.5),
+    fontWeight: '700',
+    color: '#000000',
+  },
+  avisCount: {
+    fontSize: wp(5.5),
+    fontWeight: '700',
+    color: '#000000',
+  },
+  critiqueButton: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+    padding: wp(4),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    marginVertical: hp(1),
+  },
+  critiqueButtonText: {
+    fontSize: wp(4.5),
+    color: '#000000',
+    fontWeight: '600',
+  },
+  reviewCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+    padding: wp(4),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    marginVertical: hp(1),
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(4),
+    marginBottom: hp(1),
+  },
+  reviewImage: {
+    height: wp(18),
+    width: wp(18),
+    borderRadius: wp(9),
+  },
+  reviewName: {
+    fontSize: wp(4.5),
+    fontWeight: '700',
+    color: '#000000',
+  },
+  reviewTime: {
+    fontSize: wp(3.5),
+    fontWeight: '600',
+    color: 'rgba(169,169,169,0.9)',
+  },
+  reviewRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(169,169,169,0.2)',
+    borderRadius: 10,
+    padding: wp(1.5),
+    gap: wp(2),
+    width: wp(20),
+    marginLeft: 'auto',
+  },
+  reviewRatingText: {
+    fontSize: wp(4.5),
+    fontWeight: '700',
+    color: '#000000',
+  },
+  reviewText: {
+    fontSize: wp(4),
+    color: '#000000',
+    fontWeight: 'normal',
+    marginBottom: hp(1),
+  },
+  reviewActions: {
+    flexDirection: 'row',
+    gap: wp(6),
+    alignItems: 'center',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: wp(6),
+    marginVertical: hp(2),
+  },
+  callButton: {
+    backgroundColor: '#E60449',
+    borderRadius: 20,
+    padding: wp(4),
+    width: wp(40),
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  callButtonText: {
+    fontSize: wp(4.5),
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  requestButton: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: wp(4),
+    width: wp(40),
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E60449',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  requestButtonText: {
+    fontSize: wp(4.5),
+    fontWeight: '700',
+    color: '#E60449',
+  },
 });

@@ -17,6 +17,8 @@ import Donateur from '../screnns/donateur';
 import BankSang from '../screnns/bankSang';
 import LocalisationBank from '../screnns/localisationBank';
 import Chargement from '../chargement/chargement';
+import Soutenir from '../screnns/Soutenir';
+import demandesSang from '../screnns/demandesSang';
 
 const Stack = createStackNavigator();
 
@@ -39,6 +41,8 @@ export default function Navigation() {
         <Stack.Screen name="BankSang" component={BankSang} />
         <Stack.Screen name="LocalisationBank" component={LocalisationBank} />
         <Stack.Screen name=" Chargement" component={ Chargement } />
+        <Stack.Screen name="Soutenir" component={Soutenir } />
+        <Stack.Screen name="demandesSang" component={demandesSang } />
 
 
 

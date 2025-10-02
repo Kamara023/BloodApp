@@ -1,123 +1,288 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Modal, Image, ImageBackground } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, FlatList, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { RadioButton, Checkbox } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import * as Location from 'expo-location'; // Import de Location depuis Expo
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Location from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
 
-// Tableau de données pour afficher les informations du profil
 const data = [
-    { label: 'Donné', value: '05' },
-    { label: 'groupe sanguin', value: 'A-' },
-    { label: 'Vie sauvée', value: '06' },
+  { id: '1', label: 'Donné', value: '05' },
+  { id: '2', label: 'Groupe sanguin', value: 'A-' },
+  { id: '3', label: 'Vie sauvée', value: '06' },
+];
+
+const profileData = [
+  {
+    id: '1',
+    name: 'Jame Peterson',
+    lastDonation: 'Dernier don décembre 2023',
+    image: require('../../assets/image/portrait.jpg'),
+  },
 ];
 
 export default function ProfileDonateur() {
-    // Effet pour obtenir la position initiale de l'utilisateur
-    useEffect(() => {
-        (async () => {
-            // Demander la permission d'accéder à la localisation
-            let { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-                console.log('Permission to access location was denied');
-                return;
-            }
+  const navigation = useNavigation();
+  const [initialPosition, setInitialPosition] = useState(null);
 
-            // Obtenir la position actuelle de l'utilisateur
-            let location = await Location.getCurrentPositionAsync({});
-            const { latitude, longitude } = location.coords;
-            setInitialPosition({
-                latitude,
-                longitude,
-                latitudeDelta: 0.0922,
-                longitudeDelta: 0.0421,
-            });
-        })();
-    }, []);
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Permission to access location was denied');
+        return;
+      }
 
-    const navigation = useNavigation();
-    const [initialPosition, setInitialPosition] = useState(null); // État pour stocker la position initiale
+      let location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+      setInitialPosition({
+        latitude,
+        longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
+    })();
+  }, []);
 
-    return (
-        <View style={styles.container}>
+  const renderProfile = ({ item }) => (
+    <Animated.View entering={FadeInDown.delay(100)} style={styles.profileContainer}>
+      <Image source={item.image} style={styles.profileImage} />
+      <View style={styles.profileInfo}>
+        <Text style={styles.profileName}>{item.name}</Text>
+        <Text style={styles.profileDonation}>{item.lastDonation}</Text>
+      </View>
+    </Animated.View>
+  );
 
-            {/* En-tête avec le bouton de retour et le titre */}
-            <View style={{ marginTop: '20%', paddingHorizontal: 20, gap: 95, flexDirection: 'row', alignItems: 'center', marginBottom: 15 }}>
-                <TouchableOpacity onPress={() => navigation.navigate('Tabs')}>
-                    <Ionicons name="arrow-back-outline" size={40} color="#000000" />
-                </TouchableOpacity>
-                <View>
-                    <Text style={{ fontSize: 30, fontWeight: 'bold' }}>Profile</Text>
-                </View>
-            </View>
+  const renderStat = ({ item }) => (
+    <Animated.View entering={FadeInDown.delay(200)} style={styles.statCard}>
+      <Text style={styles.statLabel}>{item.label}</Text>
+      <Text style={styles.statValue}>{item.value}</Text>
+    </Animated.View>
+  );
 
-            {/* Contenu du profil */}
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <View>
-                    {/* Photo de profil et informations utilisateur */}
-                    <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 20, marginBottom: 5, }} >
-                        <Image source={require('../../assets/image/portrait.jpg')} style={{ height: 130, width: 130, borderRadius: 999 }} />
-                        <View style={{ marginTop: 10, padding: 10, alignItems: 'center', gap: 5 }}>
-                            <Text style={{ color: "#000000", fontSize: 20, fontWeight: 'bold' }}>Jame Peterson</Text>
-                            <Text style={{ color: 'rgba(169,169,169,0.9)', fontSize: 18, fontWeight: 'bold' }}>Dernier don décembre 2023</Text>
-                        </View>
-                    </View>
-                </View>
-
-                {/* Informations sur le donateur */}
-                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 15, marginBottom: 10 }}>
-                    {data.map((item, index) => (
-                        <View key={index}>
-                            <View style={{ alignItems: 'center', gap: 5, backgroundColor: 'rgba(169,169,169,0.2)', width: 120, height: 85, justifyContent: 'center', padding: 5, borderRadius: 15 }}>
-                                <Text style={{ color: 'rgba(169,169,169,0.9)', fontSize: 15, fontWeight: '700' }}>{item.label}</Text>
-                                <Text style={{ color: "#000000", fontSize: 28, fontWeight: 'bold' }}>{item.value}</Text>
-                            </View>
-                        </View>
-                    ))}
-                </View>
-
-                {/* Carte affichant la position actuelle de l'utilisateur */}
-                {initialPosition && (
-                    <MapView
-                        style={{ flex: 1, height: 300, borderRadius: 30, marginTop: 15, }}
-                        initialRegion={initialPosition}
-                    >
-                        <Marker
-                            coordinate={initialPosition}
-                            title="Votre position"
-                            description="C'est votre position actuelle"
-                        />
-                    </MapView>
-                )}
-            </ScrollView>
-
-            {/* Boutons d'action */}
-            <View style={{ flexDirection: 'row', justifyContent: "center", alignItems: 'center', gap: 40, marginBottom: 40, marginTop: 10 }}>
-                <View>
-                    <TouchableOpacity>
-                        <View style={{ backgroundColor: '#E60449', borderRadius: 20, alignItems: 'center', justifyContent: 'center', padding: 15, width: 160 }}>
-                            <Text style={{ color: '#FFFFFF', fontSize: 20, fontWeight: 'bold', }}> Appeler</Text>
-                        </View>
-                    </TouchableOpacity>
-                </View>
-
-                <View>
-                    <TouchableOpacity>
-                        <View style={{ backgroundColor: '#FFFFFF', borderRadius: 20, alignItems: 'center', justifyContent: 'center', padding: 15, width: 160, borderWidth: 1, borderColor: '#E60449' }}>
-                            <Text style={{ color: '#E60449', fontSize: 20, fontWeight: 'bold', }}> Demander </Text>
-                        </View>
-                    </TouchableOpacity>
-                </View>
-            </View>
-
-        </View>
+  const renderMap = () =>
+    initialPosition && (
+      <Animated.View entering={FadeInDown.delay(300)} style={styles.mapContainer}>
+        <MapView style={styles.map} initialRegion={initialPosition}>
+          <Marker
+            coordinate={initialPosition}
+            title="Votre position"
+            description="C'est votre position actuelle"
+          />
+        </MapView>
+      </Animated.View>
     );
+
+  const renderActions = () => (
+    <Animated.View entering={FadeInDown.delay(400)} style={styles.actionButtons}>
+      <TouchableOpacity>
+        <View style={styles.callButton}>
+          <Text style={styles.callButtonText}>Appeler</Text>
+        </View>
+      </TouchableOpacity>
+      <TouchableOpacity>
+        <View style={styles.requestButton}>
+          <Text style={styles.requestButtonText}>Demander</Text>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+
+  const flatListData = [
+    { type: 'profile', data: profileData },
+    { type: 'stats', data: data },
+    { type: 'map', data: null },
+    { type: 'actions', data: null },
+  ];
+
+  const renderSection = ({ item }) => {
+    if (item.type === 'profile') {
+      return (
+        <FlatList
+          data={item.data}
+          renderItem={renderProfile}
+          keyExtractor={(profile) => profile.id}
+          scrollEnabled={false}
+        />
+      );
+    }
+    if (item.type === 'stats') {
+      return (
+        <FlatList
+          data={item.data}
+          renderItem={renderStat}
+          keyExtractor={(stat) => stat.id}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.statsContainer}
+        />
+      );
+    }
+    if (item.type === 'map') {
+      return renderMap();
+    }
+    if (item.type === 'actions') {
+      return renderActions();
+    }
+    return null;
+  };
+
+  return (
+    <SafeAreaView style={styles.safeArea} edges={['bottom', 'left', 'right']}>
+      <View style={styles.container}>
+        {/* En-tête */}
+        <Animated.View entering={FadeInDown} style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.navigate('Tabs')}>
+            <Ionicons name="arrow-back-outline" size={wp(8)} color="#000000" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Profil</Text>
+        </Animated.View>
+
+        {/* Contenu principal */}
+        <FlatList
+          data={flatListData}
+          renderItem={renderSection}
+          keyExtractor={(item) => item.type}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContainer}
+        />
+      </View>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingHorizontal: 15
-    },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F8F8F8', // Aligné avec Home, Donateur, Trouverdonateur, BankSang, LocalisationBank, Notification, Profile
+  },
+  container: {
+    flex: 1,
+    paddingHorizontal: wp(4),
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(3), // Réduit de gap: 95
+    marginBottom: hp(0.5),
+  },
+  headerTitle: {
+    fontSize: wp(6), // Réduit de 30
+    fontWeight: '700',
+    color: '#000000',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+  },
+  listContainer: {
+    paddingBottom: hp(2),
+  },
+  profileContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: hp(2),
+  },
+  profileImage: {
+    height: wp(30), // Réduit de 130
+    width: wp(30),
+    borderRadius: wp(15),
+  },
+  profileInfo: {
+    marginTop: hp(1),
+    alignItems: 'center',
+    gap: hp(0.5),
+  },
+  profileName: {
+    color: '#000000',
+    fontSize: wp(5),
+    fontWeight: '700',
+  },
+  profileDonation: {
+    color: 'rgba(169,169,169,0.9)',
+    fontSize: wp(4),
+    fontWeight: '600',
+  },
+  statsContainer: {
+    justifyContent: 'center',
+    gap: wp(4), // Réduit de gap: 15
+    marginVertical: hp(2),
+  },
+  statCard: {
+    alignItems: 'center',
+    gap: hp(0.5),
+    backgroundColor: '#FFFFFF', // Changé de rgba(169,169,169,0.2)
+    width: wp(28), // Réduit de 120
+    height: hp(10), // Réduit de 85
+    justifyContent: 'center',
+    padding: wp(2),
+    borderRadius: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  statLabel: {
+    color: 'rgba(169,169,169,0.9)',
+    fontSize: wp(3.5),
+    fontWeight: '700',
+  },
+  statValue: {
+    color: '#000000',
+    fontSize: wp(6),
+    fontWeight: '700',
+  },
+  mapContainer: {
+    marginVertical: hp(2),
+  },
+  map: {
+    width: wp(92),
+    height: hp(35), // Réduit de 300
+    borderRadius: 15,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: wp(6), // Réduit de gap: 40
+    marginVertical: hp(2),
+  },
+  callButton: {
+    backgroundColor: '#E60449',
+    borderRadius: 20,
+    padding: wp(4),
+    width: wp(40), // Réduit de 160
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  callButtonText: {
+    color: '#FFFFFF',
+    fontSize: wp(4.5),
+    fontWeight: '700',
+  },
+  requestButton: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: wp(4),
+    width: wp(40), // Réduit de 160
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E60449',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  requestButtonText: {
+    color: '#E60449',
+    fontSize: wp(4.5),
+    fontWeight: '700',
+  },
 });
